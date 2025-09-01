@@ -1,0 +1,1068 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Planeta Lounge | Кальянная</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+
+  <!-- Фавикон -->
+  <link rel="icon" type="image/png" href="https://emojipedia-us.s3.dualstack.us-west-1.amazonaws.com/thumbs/120/apple/285/glowing-star_1f31f.png" sizes="32x32">
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    body {
+      background-color: #0f0f1a;
+      color: #fff;
+      line-height: 1.6;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* === Анимация неоновых полос === */
+    .neon-strip-left, .neon-strip-right {
+      position: fixed;
+      top: 0;
+      width: 5px;
+      height: 100vh;
+      background: linear-gradient(to bottom, #ff00cc, #00ffcc, #3333ff);
+      box-shadow: 0 0 15px #00ffcc;
+      z-index: 9999;
+      animation: pulse 3s infinite alternate;
+    }
+
+    .neon-strip-left {
+      left: 20px;
+    }
+
+    .neon-strip-right {
+      right: 20px;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 0.6; box-shadow: 0 0 10px #00ffcc; }
+      100% { opacity: 1; box-shadow: 0 0 25px #00ffcc, 0 0 35px #ff00cc; }
+    }
+
+    /* === Дым-анимация === */
+    .smoke {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+      overflow: hidden;
+    }
+
+    .smoke-item {
+      position: absolute;
+      bottom: -10%;
+      width: 100px;
+      height: 100px;
+      background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 50%, transparent 70%);
+      border-radius: 50%;
+      filter: blur(10px);
+      opacity: 0;
+      animation: float 25s infinite ease-in-out;
+    }
+
+    @keyframes float {
+      0% { transform: translateY(0) rotate(0deg); opacity: 0; }
+      10% { opacity: 0.6; }
+      90% { opacity: 0.4; }
+      100% { transform: translateY(-120vh) rotate(360deg); opacity: 0; }
+    }
+
+    /* === 18+ плашка === */
+    .age-warning {
+      position: relative;
+      background: #ff0066;
+      color: white;
+      text-align: center;
+      padding: 8px;
+      font-weight: bold;
+      font-size: 1rem;
+      letter-spacing: 1px;
+      box-shadow: 0 0 10px rgba(255, 0, 100, 0.5);
+      z-index: 1000;
+      margin-bottom: 20px;
+      border-bottom: 2px solid #00ffcc;
+    }
+
+    .age-warning i {
+      margin-right: 5px;
+    }
+
+    /* === Плашка дня рождения === */
+    .birthday-warning {
+      position: relative;
+      background: #3333ff;
+      color: white;
+      text-align: center;
+      padding: 10px;
+      font-weight: bold;
+      font-size: 1.1rem;
+      letter-spacing: 1px;
+      box-shadow: 0 0 10px rgba(51, 51, 255, 0.5);
+      z-index: 1000;
+      margin-bottom: 20px;
+      border-bottom: 2px solid #00ffcc;
+      border-radius: 8px;
+    }
+
+    .birthday-warning i {
+      margin-right: 5px;
+      color: #ffcc00;
+    }
+
+    /* === Контейнер === */
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      position: relative;
+      z-index: 10;
+    }
+
+    /* === Загрузка (лоадер) === */
+    .loader-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #0f0f1a;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 99999;
+      transition: opacity 0.5s ease-out;
+    }
+
+    .loader {
+      font-size: 2rem;
+      color: #00ffcc;
+      text-shadow: 0 0 10px #00ffcc;
+      animation: blink 1.5s infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 0.4; }
+      50% { opacity: 1; }
+    }
+
+    /* === Основной контент (скрыт до загрузки) === */
+    .content {
+      opacity: 0;
+      transition: opacity 0.8s ease;
+    }
+
+    .loaded .content {
+      opacity: 1;
+    }
+
+    .loaded .loader-container {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    /* === Заголовок === */
+    header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      background: linear-gradient(90deg, #ff00cc, #3333ff, #00ffcc);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+      font-weight: 700;
+      letter-spacing: 2px;
+    }
+
+    .subtitle {
+      color: #00ffcc;
+      font-size: 1.2rem;
+      margin-top: 10px;
+      text-shadow: 0 0 5px #00ffcc;
+    }
+
+    /* === Секции === */
+    .section {
+      margin-bottom: 30px;
+      background: rgba(20, 20, 40, 0.6);
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 0 15px rgba(0, 255, 255, 0.2);
+    }
+
+    h2 {
+      font-size: 1.6rem;
+      color: #ff00cc;
+      margin-bottom: 15px;
+      border-bottom: 2px solid #00ffcc;
+      padding-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* === Меню-пункт === */
+    .menu-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(0, 255, 255, 0.1);
+      font-size: 1.1rem;
+    }
+
+    .menu-item:last-child {
+      border-bottom: none;
+    }
+
+    .menu-item-content {
+      flex: 1;
+    }
+
+    .item-name {
+      font-weight: 600;
+    }
+
+    .item-desc {
+      font-size: 0.95rem;
+      color: #ccc;
+      margin-top: 4px;
+      line-height: 1.4;
+    }
+
+    .menu-item-price {
+      color: #00ffcc;
+      font-weight: bold;
+      min-width: 100px;
+      text-align: right;
+      margin-left: 20px;
+    }
+
+    /* === Всплывающие подсказки === */
+    .flavor {
+      display: inline-block;
+      margin: 3px 5px 3px 0;
+      padding: 4px 8px;
+      background: rgba(0, 255, 255, 0.1);
+      border-radius: 6px;
+      font-size: 0.9rem;
+      cursor: help;
+      border-bottom: 1px dashed #00ffcc;
+      position: relative;
+    }
+
+    .tooltip {
+      visibility: hidden;
+      width: 220px;
+      background: #1a1a3a;
+      color: #fff;
+      text-align: center;
+      border-radius: 6px;
+      padding: 8px;
+      position: absolute;
+      z-index: 100;
+      bottom: 125%;
+      left: 50%;
+      margin-left: -110px;
+      opacity: 0;
+      transition: opacity 0.3s;
+      font-size: 0.85rem;
+      box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+      pointer-events: none;
+    }
+
+    .flavor:hover .tooltip {
+      visibility: visible;
+      opacity: 1;
+    }
+
+    .flavor::after {
+      content: "";
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      margin-left: -5px;
+      border: 5px solid transparent;
+      border-top-color: #1a1a3a;
+    }
+
+    /* === Пробковый сбор === */
+    .corkage-warning {
+      background: rgba(255, 0, 100, 0.2);
+      border: 2px solid #ff0066;
+      border-radius: 12px;
+      padding: 15px;
+      color: #ff0066;
+      font-weight: bold;
+      text-shadow: 0 0 5px rgba(255, 0, 100, 0.5);
+      font-size: 1.1rem;
+    }
+
+    .corkage-warning strong {
+      color: #00ffcc;
+    }
+
+    /* === Ссылка на карты === */
+    .map-link {
+      display: block;
+      text-align: center;
+      margin: 15px 0;
+      color: #00ffcc;
+      font-weight: bold;
+      text-decoration: none;
+      transition: transform 0.2s;
+    }
+
+    .map-link:hover {
+      transform: scale(1.05);
+    }
+
+    .map-link i {
+      margin-right: 8px;
+    }
+
+    /* === Футер === */
+    footer {
+      text-align: center;
+      margin-top: 40px;
+      padding: 25px;
+      background: rgba(15, 15, 30, 0.8);
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0, 255, 255, 0.1);
+    }
+
+    .hours {
+      color: #00ffcc;
+      font-weight: bold;
+      font-size: 1.1rem;
+    }
+
+    .contact-info {
+      margin-top: 15px;
+      font-size: 1rem;
+      color: #ccc;
+    }
+
+    .contact-info a {
+      color: #00ffcc;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    .contact-info a:hover {
+      text-decoration: underline;
+    }
+
+    .copy-btn {
+      background: #00ffcc;
+      color: #0f0f1a;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      margin-left: 10px;
+      transition: transform 0.2s;
+    }
+
+    .copy-btn:hover {
+      transform: scale(1.05);
+    }
+
+    @media (max-width: 480px) {
+      h1 { font-size: 2rem; }
+      .container { padding: 15px; }
+      .menu-item { flex-direction: column; }
+      .menu-item-price {
+        margin-top: 5px;
+        min-width: auto;
+        text-align: left;
+      }
+      .neon-strip-left, .neon-strip-right { display: none; }
+    }
+  </style>
+</head>
+<body class="loaded">
+
+  <!-- Анимация загрузки -->
+  <div class="loader-container">
+    <div class="loader">🌌 Загружаем Planeta Lounge...</div>
+  </div>
+
+  <!-- Основной контент -->
+  <div class="content">
+
+    <!-- Плашка 18+ -->
+    <div class="age-warning">
+      <i class="fas fa-exclamation-triangle"></i> ВХОД ТОЛЬКО С 18 ЛЕТ
+    </div>
+
+    <!-- Плашка ДНЯ РОЖДЕНИЯ -->
+    <div class="birthday-warning">
+      <i class="fas fa-gift"></i> Ура! В ДЕНЬ РОЖДЕНИЯ — <strong>10% СКИДКА</strong> на весь счёт! 🎉
+    </div>
+
+    <!-- Анимация дыма -->
+    <div class="smoke">
+      <div class="smoke-item" style="left: 10%; animation-delay: 0s;"></div>
+      <div class="smoke-item" style="left: 25%; animation-delay: 3s;"></div>
+      <div class="smoke-item" style="left: 40%; animation-delay: 6s;"></div>
+      <div class="smoke-item" style="left: 60%; animation-delay: 9s;"></div>
+      <div class="smoke-item" style="left: 75%; animation-delay: 12s;"></div>
+      <div class="smoke-item" style="left: 90%; animation-delay: 15s;"></div>
+      <div class="smoke-item" style="left: 20%; animation-delay: 18s;"></div>
+      <div class="smoke-item" style="left: 50%; animation-delay: 21s;"></div>
+    </div>
+
+    <!-- Неоновые полосы -->
+    <div class="neon-strip-left"></div>
+    <div class="neon-strip-right"></div>
+
+    <!-- Основной контент -->
+    <div class="container">
+      <header>
+        <h1>🌌 Planeta Lounge</h1>
+        <p class="subtitle">Где дым становится музыкой</p>
+      </header>
+
+      <!-- УСЛУГИ: VIP-КОМНАТА -->
+      <section class="section">
+        <h2><i class="fas fa-door-closed"></i> Услуги</h2>
+
+        <div class="menu-item">
+          <div class="menu-item-content">
+            <div class="item-name">VIP-комната</div>
+            <div class="item-desc">Идеально для компании — уединение и комфорт</div>
+          </div>
+          <div class="menu-item-price">500 ₽/час</div>
+        </div>
+
+        <div class="menu-item">
+          <div class="menu-item-content">
+            <div class="item-name">VIP-комната с PlayStation 5</div>
+            <div class="item-desc">Играй в игры во время отдыха</div>
+          </div>
+          <div class="menu-item-price">650 ₽/час</div>
+        </div>
+      </section>
+
+      <!-- ПРОБКОВЫЙ СБОР -->
+      <section class="section">
+        <h2><i class="fas fa-wine-bottle"></i> Важно</h2>
+        <div class="corkage-warning">
+          💣 <strong>Пробковый сбор:</strong><br>
+          • За сладкие и слабоалкогольные напитки — <strong>100 ₽/бутылка</strong><br>
+          • За крепкие напитки — <strong>300 ₽/бутылка</strong>
+        </div>
+      </section>
+
+      <!-- ТАБАК -->
+      <section class="section">
+        <h2><i class="fas fa-smoking"></i> Меню табака</h2>
+
+        <div class="menu-item">
+          <div class="menu-item-content">
+            <div class="item-name">Кальян на классической чашке</div>
+            <div class="item-desc">
+              <strong style="color: #00ffcc;">Вс–Чт: 1200 ₽</strong> | <strong style="color: #00ffcc;">Пт–Сб: 1300 ₽</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- Лёгкая крепость -->
+        <div class="menu-item">
+          <div class="menu-item-content">
+            <div class="item-name"><strong>🍃 Лёгкая крепость</strong></div>
+          </div>
+        </div>
+
+        <div class="menu-item">
+          <div class="menu-item-content">
+            <div class="item-name"><strong>Starline</strong></div>
+            <div class="item-desc">
+              <span class="flavor">земляника
+                <span class="tooltip">Сладкая лесная ягода с нежной кислинкой</span>
+              </span>
+              <span class="flavor">смородиновый сорбет
+                <span class="tooltip">Освежающий лёд с кисло-сладким ароматом чёрной смородины</span>
+              </span>
+              <span class="flavor">лемонграсс
+                <span class="tooltip">Травяной цитрус с восточным шармом</span>
+              </span>
+              <span class="flavor">маракуйя
+                <span class="tooltip">Тропическая кислинка с цветочным оттенком</span>
+              </span>
+              <span class="flavor">энергетик
+                <span class="tooltip">Как будто пьёшь банку литра — бодрит и свежо!</span>
+              </span>
+              <span class="flavor">лаймовый сорбет
+                <span class="tooltip">Лёд, лайм и капля мятного холода</span>
+              </span>
+              <span class="flavor">мятная пастилка
+                <span class="tooltip">Сладкая мята, как в детстве</span>
+              </span>
+              <span class="flavor">ананас
+                <span class="tooltip">Яркий тропик — сладкий и кислый</span>
+              </span>
+              <span class="flavor">оранжина
+                <span class="tooltip">Лимонад из детства с газировкой и апельсином</span>
+              </span>
+              <span class="flavor">свободная куба
+                <span class="tooltip">Коктейль с ромом, мятой и лимоном — без алкоголя</span>
+              </span>
+              <span class="flavor">банан
+                <span class="tooltip">Сладкий, кремовый, как банановый коктейль</span>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Средняя крепость -->
+        <div class="menu-item">
+          <div class="menu-item-content">
+            <div class="item-name"><strong>🔥 Средняя крепость</strong></div>
+          </div>
+        </div>
+
+        <div class="menu-item">
+          <div class="menu-item-content">
+            <div class="item-name"><strong>Black Burn</strong></div>
+            <div class="item-desc">
+              <span class="flavor">ice baby
+                <span class="tooltip">Ягодный сорбет с грейпфрутом</span>
+              </span>
+              <span class="flavor">malibu
+                <span class="tooltip">клубничный леденец</span>
+              </span>
+              <span class="flavor">white grape
+                <span class="tooltip">белый виноград</span>
+              </span>
+              <span class="flavor">Nutella
+                <span class="tooltip">шоколадно-ореховая паста</span>
+              </span>
+              <span class="flavor">на чиле
+                <span class="tooltip">тропический сок</span>
+              </span>
+              <span class="flavor">cherry shock
+                <span class="tooltip">кислая вишня</span>
+              </span>
+              <span class="flavor">raspberry shock
+                <span class="tooltip">кислая малина</span>
+              </span>
+              <span class="flavor">rising star
+                <span class="tooltip">манго-маракуйя</span>
+              </span>
+              <span class="flavor">papaya v obed
+                <span class="tooltip">яркая папайя</span>
+              </span>
+              <span class="flavor">ëlka
+                <span class="tooltip">ёлка</span>
+              </span>
+              <span class="flavor">skittles
+                <span class="tooltip">скитлз</span>
+              </span>
+              <span class="flavor">peach yogurt
+                <span class="tooltip">персиковый йогурт</span>
+              </span>
+              <span class="flavor">haribon
+                <span class="tooltip">мармелад-кола</span>
+              </span>
+              <span class="flavor">basilic
+                <span class="tooltip">базилик</span>
+              </span>
+              <span class="flavor">pineapple yogurt
+                <span class="tooltip">ананасовый йогурт</span>
+              </span>
+              <span class="flavor">epic yogurt
+                <span class="tooltip">черничный йогурт</span>
+              </span>
+              <span class="flavor">pomelo
+                <span class="tooltip">помело</span>
+              </span>
+              <span class="flavor">на расслаблне
+                <span class="tooltip">банановое суфле</span>
+              </span>
+              <span class="flavor">lime shock
+                <span class="tooltip">кислый лайм</span>
+              </span>
+              <span class="flavor">gooseberry shock
+                <span class="tooltip">кислый крыжовник</span>
+              </span>
+              <span class="flavor">pudding
+                <span class="tooltip">пудинг</span>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="menu-item">
+          <div class="menu-item-content">
+            <div class="item-name"><strong>MastHave</strong></div>
+            <div class="item-desc">
+              <span class="flavor">rocketman
+                <span class="tooltip">клубника, киви и грейпфрут</span>
+              </span>
+              <span class="flavor">apple drops
+                <span class="tooltip">яблочные конфеты</span>
+              </span>
+              <span class="flavor">candy cow
+                <span class="tooltip">карамель и сгущённое молоко</span>
+              </span>
+              <span class="flavor">pinkman
+                <span class="tooltip">розовые фрукты и ягоды</span>
+              </span>
+              <span class="flavor">ice cream
+                <span class="tooltip">мороженое</span>
+              </span>
+              <span class="flavor">cacao
+                <span class="tooltip">какао и маршмэллоу</span>
+              </span>
+              <span class="flavor">mulled wine
+                <span class="tooltip">глинтвейн</span>
+              </span>
+              <span class="flavor">sea buckthorn tea
+                <span class="tooltip">облепиховый чай</span>
+              </span>
+              <span class="flavor">baikal
+                <span class="tooltip">лесные травы и хвоя</span>
+              </span>
+              <span class="flavor">banana mama
+                <span class="tooltip">банан</span>
+              </span>
+              <span class="flavor">earl grey
+                <span class="tooltip">чай</span>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="menu-item">
+          <div class="menu-item-content">
+            <div class="item-name"><strong>Chabacco</strong></div>
+            <div class="item-desc">
+              <span class="flavor">фруктелла
+                <span class="tooltip">Микс ягод: малина, ежевика, черника</span>
+              </span>
+              <span class="flavor">персик-абрикос
+                <span class="tooltip">Сочный летний микс спелых фруктов</span>
+              </span>
+              <span class="flavor">кремовый энергетик
+                <span class="tooltip">Энергетик с молочной пенкой — мягко и бодро</span>
+              </span>
+              <span class="flavor">кактусовый фристайл
+                <span class="tooltip">Кактус с лимоном и льдом — дерзко и свежо</span>
+              </span>
+              <span class="flavor">смородиновый крамбл
+                <span class="tooltip">Чёрная смородина с хрустящей крошкой</span>
+              </span>
+              <span class="flavor">кислая брусника
+                <span class="tooltip">Яркая кислинка с лёгкой сладостью</span>
+              </span>
+              <span class="flavor">индийская жвачка
+                <span class="tooltip">Масала, мята, лимон — огонь и свежесть</span>
+              </span>
+              <span class="flavor">бабл кофе
+                <span class="tooltip">Кофе с молоком и карамелью</span>
+              </span>
+              <span class="flavor">капучино-маршмеллоу
+                <span class="tooltip">Тёплый капучино с зефиром — уютно</span>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="menu-item">
+          <div class="menu-item-content">
+            <div class="item-name"><strong>НАШ</strong></div>
+            <div class="item-desc">
+              <span class="flavor">вафли
+                <span class="tooltip">Свежие вафли с маслом и сахаром</span>
+              </span>
+              <span class="flavor">май тай
+                <span class="tooltip">ром, лайм, ананас, миндаль</span>
+              </span>
+              <span class="flavor">последний самурай
+                <span class="tooltip">ваниль, вишня, жасмин</span>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Высокая крепость -->
+        <div class="menu-item">
+          <div class="menu-item-content">
+            <div class="item-name"><strong>💣 Высокая крепость</strong></div>
+          </div>
+        </div>
+
+        <div class="menu-item">
+          <div class="menu-item-content">
+            <div class="item-name"><strong>Sebero Black</strong></div>
+            <div class="item-desc">
+              <span class="flavor">фейхоа
+                <span class="tooltip">Тропический фрукт с мятной ноткой</span>
+              </span>
+              <span class="flavor">черника
+                <span class="tooltip">Спелая лесная ягода — глубокий вкус</span>
+              </span>
+              <span class="flavor">чернослив
+                <span class="tooltip">Сладкий, терпкий, с лёгкой горчинкой</span>
+              </span>
+              <span class="flavor">бабл гам с цитрусом
+                <span class="tooltip">Жвачка с апельсином и лимоном — ярко!</span>
+              </span>
+              <span class="flavor">арбуз-дыня
+                <span class="tooltip">Лето в одном затяге — свежо и сочно</span>
+              </span>
+              <span class="flavor">сок мультифрукт
+                <span class="tooltip">Микс фруктов — яблоко, апельсин, виноград</span>
+              </span>
+              <span class="flavor">кислый лимон
+                <span class="tooltip">Чистый цитрус с лёгкой горечью</span>
+              </span>
+              <span class="flavor">малиновый Рафаэлло
+                <span class="tooltip">Малина, кокос, миндаль — как конфета</span>
+              </span>
+              <span class="flavor">киви
+                <span class="tooltip">Кисло-сладкий тропик с лёгкой землянистостью</span>
+              </span>
+              <span class="flavor">бабл бам
+                <span class="tooltip">Жвачка с мятой и лимоном — взрыв вкуса</span>
+              </span>
+              <span class="flavor">мармеладные мишки
+                <span class="tooltip">Как будто дышишь конфетами Haribo</span>
+              </span>
+              <span class="flavor">лимонные вафли
+                <span class="tooltip">Вафли с цитрусовым кремом</span>
+              </span>
+              <span class="flavor">кактус
+                <span class="tooltip">Экзотический кактус с каплей лимона</span>
+              </span>
+              <span class="flavor">жвачка лов им
+                <span class="tooltip">Мятная жвачка с лёгкой сладостью</span>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="menu-item">
+          <div class="menu-item-content">
+            <div class="item-name"><strong>Trofimoff's</strong></div>
+            <div class="item-desc">
+              <span class="flavor">лаванда
+                <span class="tooltip">Цветочный аромат с расслабляющим эффектом</span>
+              </span>
+              <span class="flavor">роза
+                <span class="tooltip">Элегантный аромат розы с каплей мёда</span>
+              </span>
+              <span class="flavor">гранат
+                <span class="tooltip">Глубокий, терпкий, с лёгкой кислинкой</span>
+              </span>
+              <span class="flavor">вишня
+                <span class="tooltip">Спелая вишня — сладкая и насыщенная</span>
+              </span>
+              <span class="flavor">киви
+                <span class="tooltip">Кисло-сладкий тропик</span>
+              </span>
+              <span class="flavor">жасмин
+                <span class="tooltip">Цветочный чай с лёгкой сладостью</span>
+              </span>
+              <span class="flavor">без аромата
+                <span class="tooltip">Чистый табак — для настоящих ценителей</span>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="menu-item">
+          <div class="menu-item-content">
+            <div class="item-name"><strong>Satir</strong></div>
+            <div class="item-desc">
+              <span class="flavor">солёная карамель
+                <span class="tooltip">Сладко-солёный десерт — как в кино</span>
+              </span>
+              <span class="flavor">крымские ориенталы
+                <span class="tooltip">Чёрный чай с крыжовником и мятой</span>
+              </span>
+              <span class="flavor">маракуйя питахайя
+                <span class="tooltip">Тропический микс: маракуйя и питахайя</span>
+              </span>
+              <span class="flavor">чарующая шелковица
+                <span class="tooltip">Редкий фрукт с виноградными нотками</span>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Премиум добавка -->
+        <div class="menu-item">
+          <div class="menu-item-content">
+            <div class="item-name">Добавить премиум табак Bonche</div>
+            <div class="item-desc">Улучшает вкус и крепость смеси</div>
+          </div>
+          <div class="menu-item-price">+300 ₽</div>
+        </div>
+      </section>
+
+      <!-- ПРАВИЛА ЗАВЕДЕНИЯ -->
+      <section class="section">
+        <h2><i class="fas fa-exclamation-circle"></i> Правила заведения</h2>
+
+        <div class="item">
+          <div class="item-desc">
+            • Один кальян — максимум на <strong>3 человек</strong><br>
+            • Не шуметь — заведение находится в <strong>жилом доме</strong><br>
+            • Есть настольные игры — <strong>бесплатно</strong><br>
+            • За порчу настольных игр — штраф <strong>500 ₽</strong><br>
+            • Курение сигарет — штраф <strong>500 ₽</strong><br>
+            • За разбитие стаканов — штраф <strong>300 ₽</strong><br>
+            • За разбитие колбы кальяна — штраф <strong>2000 ₽</strong><br>            
+            • За разбитие чайника — штраф <strong>1000 ₽</strong><br>
+            • Свою музыку не включать. Хотите поставить песню? — <strong>50 ₽</strong><br>
+            • Доступен <strong>free WiFi</strong> — спросите пароль у кальянного мастера
+          </div>
+        </div>
+      </section>
+
+      <!-- ГОРЯЧИЕ НАПИТКИ -->
+      <section class="section">
+        <h2><i class="fas fa-hot-tub"></i> Горячие напитки</h2>
+
+        <div class="menu-item">
+          <div class="menu-item-content">
+            <div class="item-name">Чёрный или зелёный чай</div>
+            <div class="item-desc">Классика, согревающая душу и разум.</div>
+          </div>
+          <div class="menu-item-price">300 ₽</div>
+        </div>
+
+        <div class="menu-item">
+          <div class="menu-item-content">
+            <div class="item-name">Молочный улун или каркаде</div>
+            <div class="item-desc">Нежный баланс сладости и терпкости — как закат над океаном.</div>
+          </div>
+          <div class="menu-item-price">450 ₽</div>
+        </div>
+
+        <div class="menu-item">
+          <div class="menu-item-content">
+            <div class="item-name">Добавки к чаю (мята, чабрец)</div>
+          </div>
+          <div class="menu-item-price">+50 ₽</div>
+        </div>
+      </section>
+
+      <!-- ХОЛОДНЫЕ НАПИТКИ -->
+      <section class="section">
+        <h2><i class="fas fa-ice-cream"></i> Холодные напитки</h2>
+
+        <div class="menu-item">
+          <div class="menu-item-content">
+            <div class="item-name">Пиво (0.45 л) — Балтика 0, Löwenbräu, Green Beat, Zatecky Gus, Хамовники, Жигули, Bud, Velkopovicky Kozel</div>
+          </div>
+          <div class="menu-item-price">200 ₽</div>
+        </div>
+
+        <div class="menu-item">
+          <div class="menu-item-content">
+            <div class="item-name">Пиво (0.5 л) — Томское, Hoegaarden Cerry, Krone Blanche, Балтика 7, Spaten, Stella Artois, Franziskaner Weissbier</div>
+          </div>
+          <div class="menu-item-price">250 ₽</div>
+        </div>
+
+        <div class="menu-item">
+          <div class="menu-item-content">
+            <div class="item-name">Corona Extra (0.355 л)</div>
+          </div>
+          <div class="menu-item-price">250 ₽</div>
+        </div>
+
+        <div class="menu-item">
+          <div class="menu-item-content">
+            <div class="item-name">Сидр (0.45 л) — Chester's, Мистер Лис (вишня, лесные ягоды)</div>
+          </div>
+          <div class="menu-item-price">250 ₽</div>
+        </div>
+
+        <div class="menu-item">
+          <div class="menu-item-content">
+            <div class="item-name">Lit Energy (0.45 л) — ассортимент</div>
+          </div>
+          <div class="menu-item-price">200 ₽</div>
+        </div>
+
+        <div class="menu-item">
+          <div class="menu-item-content">
+            <div class="item-name">Fanta, Sprite, Coca-Cola (0.33 л, стекло)</div>
+          </div>
+          <div class="menu-item-price">200 ₽</div>
+        </div>
+
+        <div class="menu-item">
+          <div class="menu-item-content">
+            <div class="item-name">Pepsi, Fanta, Sprite, Coca-Cola (0.3 л, ж/б)</div>
+          </div>
+          <div class="menu-item-price">150 ₽</div>
+        </div>
+
+        <div class="menu-item">
+          <div class="menu-item-content">
+            <div class="item-name">Adrenaline Rush (0.25 л)</div>
+          </div>
+          <div class="menu-item-price">150 ₽</div>
+        </div>
+
+        <div class="menu-item">
+          <div class="menu-item-content">
+            <div class="item-name">Adrenaline Rush (0.45 л)</div>
+          </div>
+          <div class="menu-item-price">250 ₽</div>
+        </div>
+
+        <div class="menu-item">
+          <div class="menu-item-content">
+            <div class="item-name">Сок Добрый (1 л)</div>
+          </div>
+          <div class="menu-item-price">250 ₽</div>
+        </div>
+
+        <div class="menu-item">
+          <div class="menu-item-content">
+            <div class="item-name">Lipton (0.5 л) — лимон, персик, зелёный</div>
+          </div>
+          <div class="menu-item-price">200 ₽</div>
+        </div>
+
+        <div class="menu-item">
+          <div class="menu-item-content">
+            <div class="item-name">Добрый кола, Мохито б/алк. (клубника, классический) — 0.5 л</div>
+          </div>
+          <div class="menu-item-price">150 ₽</div>
+        </div>
+
+        <div class="menu-item">
+          <div class="menu-item-content">
+            <div class="item-name">Rich (0.2 л) — яблоко, апельсин, вишня, манго</div>
+          </div>
+          <div class="menu-item-price">150 ₽</div>
+        </div>
+
+        <div class="menu-item">
+          <div class="menu-item-content">
+            <div class="item-name">Bona Aqua (0.5 л) — газированная / негазированная</div>
+          </div>
+          <div class="menu-item-price">100 ₽</div>
+        </div>
+
+        <div class="menu-item">
+          <div class="menu-item-content">
+            <div class="item-name">Coca-Cola (1 л)</div>
+          </div>
+          <div class="menu-item-price">300 ₽</div>
+        </div>
+      </section>
+
+      <!-- ЗАКУСКИ -->
+      <section class="section">
+        <h2><i class="fas fa-cheese"></i> Закуски</h2>
+
+        <div class="menu-item">
+          <div class="menu-item-content">
+            <div class="item-name">Сыр «Пряди» — 50 г</div>
+          </div>
+          <div class="menu-item-price">150 ₽</div>
+        </div>
+
+        <div class="menu-item">
+          <div class="menu-item-content">
+            <div class="item-name">Ассорти сыров — 150 г</div>
+          </div>
+          <div class="menu-item-price">250 ₽</div>
+        </div>
+
+        <div class="menu-item">
+          <div class="menu-item-content">
+            <div class="item-name">Pringles — 165 г, ассортимент</div>
+          </div>
+          <div class="menu-item-price">450 ₽</div>
+        </div>
+
+        <div class="menu-item">
+          <div class="menu-item-content">
+            <div class="item-name">Lay's — 70 г, ассортимент</div>
+          </div>
+          <div class="menu-item-price">200 ₽</div>
+        </div>
+
+        <div class="menu-item">
+          <div class="menu-item-content">
+            <div class="item-name">Фисташки на развес — 100 г</div>
+          </div>
+          <div class="menu-item-price">300 ₽</div>
+        </div>
+      </section>
+
+      <!-- КОНТАКТЫ -->
+      <footer>
+        <h2><i class="fas fa-map-marker-alt"></i> Мы ждём тебя</h2>
+        <p>📍 <strong>Адрес:</strong> Московская область, г. Истра,<br>ул. Ленина, д. 27</p>
+
+        <!-- Ссылка на Яндекс.Карты -->
+        <a href="https://yandex.ru/maps/org/planeta_lounge/39671976081/?ll=36.858756%2C55.911119&z=15" target="_blank" class="map-link">
+          <i class="fas fa-map-marked-alt"></i> Открыть в Яндекс.Картах
+        </a>
+
+        <p class="hours">
+          <i class="fas fa-clock"></i> Вс–Чт: 15:00 – 02:00<br>
+          Пт–Сб: 15:00 – 03:00
+        </p>
+        <div class="contact-info">
+          📞 <a id="phone-link" href="tel:+79167728873">+7 (916) 772-88-73</a>
+          <button class="copy-btn" onclick="copyPhone()">Копировать</button><br>
+          <small>Звони или пиши в WhatsApp</small>
+        </div>
+        <p style="margin-top: 15px; color: #888; font-size: 0.9rem;">
+          🌌 Planeta Lounge — твой оазис в городе
+        </p>
+      </footer>
+    </div>
+  </div>
+
+  <!-- JavaScript -->
+  <script>
+    // Анимация загрузки
+    window.onload = function() {
+      document.body.classList.add('loaded');
+    };
+
+    // Копирование телефона
+    function copyPhone() {
+      const phone = "+79167728873";
+      navigator.clipboard.writeText(phone).then(() => {
+        const btn = document.querySelector('.copy-btn');
+        const originalText = btn.textContent;
+        btn.textContent = "✅ Скопировано!";
+        setTimeout(() => {
+          btn.textContent = originalText;
+        }, 2000);
+      });
+    }
+  </script>
+</body>
+</html>
